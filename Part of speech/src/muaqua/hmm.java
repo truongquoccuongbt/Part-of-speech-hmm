@@ -11,6 +11,7 @@ public class hmm {
 	private double [][] transitionProbMatrix;
 	private HashMap<String, Integer> listState;
 	private ArrayList<String> listSentences;
+	private String input;
 	
 	public ArrayList<String> getListSentences() {
 		return listSentences;
@@ -18,11 +19,6 @@ public class hmm {
 
 	public void setListSentences(ArrayList<String> listSentences) {
 		this.listSentences = listSentences;
-	}
-
-	public double[][] EstimateTransitionPro() {
-		
-		return null;
 	}
 	
 	public hmm() {
@@ -35,6 +31,7 @@ public class hmm {
 		BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
 		String strLine;
 		while ((strLine = br.readLine()) != null) {
+			strLine = "st/st " + strLine + " sf/sf";
 			this.listSentences.add(strLine);
 		}
 		br.close();
@@ -43,17 +40,11 @@ public class hmm {
 	public void FindUniqueStateAndCount(ArrayList<String> arrSentences) {
 		String[] tmp1;
 		String[] tmp2;
-		
 		for (String string : arrSentences) {
 			tmp1 = string.split(" ");
 			for (int i = 0; i < tmp1.length; i++) {
-				if (tmp1[i].equals("/")) {
-					this.listState = AddState("/");
-				}
-				else {
-					tmp2 = tmp1[i].split("/");
-					this.listState = AddState(tmp2[1]);
-				}
+				tmp2 = tmp1[i].split("/");
+				this.listState = AddState(tmp2[1]);
 			}
 		}
 	}
@@ -83,10 +74,10 @@ public class hmm {
 	}
 	
 	public void PrintMatrix() {
-		double[][] matrix = CreateMatrixCountStateLinkStateBefore();
+		double[][] matrix = this.transitionProbMatrix;
 		for (int i = 0; i < this.listState.size(); i++) {
 			for (int j = 0; j < this.listState.size(); j++) {
-				System.out.print(matrix[i][j] + " ");
+				System.out.print(matrix[i][j] + "  ");
 			}
 			System.out.println();
 		}
@@ -95,13 +86,11 @@ public class hmm {
 	public double[][] CreateMatrixCountStateLinkStateBefore() {
 		int sizeOfMatrix = this.listState.size();
 		double[][] matrixCountStateLinkStateBefore = new double[sizeOfMatrix][sizeOfMatrix];
-		
 		for (int i = 0; i < sizeOfMatrix; i++) {
 			for (int j = 0; j < sizeOfMatrix; j++) {
 				matrixCountStateLinkStateBefore[i][j] = 0;
 			}
 		}
-		
 		matrixCountStateLinkStateBefore = FillInMatrixCountStateLinkStateBefore(matrixCountStateLinkStateBefore);
 		return matrixCountStateLinkStateBefore;	
 	}
@@ -115,29 +104,10 @@ public class hmm {
 		for (String string : listSentences) {
 			wordWithTag = string.split(" ");
 			for (int i = 1; i < wordWithTag.length; i++) {
-				if (wordWithTag[i].equals("/")) {
-					stringTmp2 = wordWithTag[i - 1].split("/");
-					row = FindPositionInListState(stringTmp2[1]);
-					col = FindPositionInListState("/");
-				}
-				else {
-					try {
-					stringTmp1 = wordWithTag[i].split("/");
-					
-					if (wordWithTag[i - 1].equals("/")) {
-						row = FindPositionInListState("/");
-						col = FindPositionInListState(stringTmp1[1]);
-					}
-					else {
-						stringTmp2 = wordWithTag[i - 1].split("/");
-						row = FindPositionInListState(stringTmp2[1]);
-						col = FindPositionInListState(stringTmp1[1]);
-					}
-					}catch (Exception e) {
-						System.out.println(string);
-					}
-				}
-				
+				stringTmp1 = wordWithTag[i].split("/");
+				stringTmp2 = wordWithTag[i - 1].split("/");
+				row = FindPositionInListState(stringTmp2[1]);
+				col = FindPositionInListState(stringTmp1[1]);
 				transitionProMatrix[row][col]++;
 			}
 			stringTmp1 = wordWithTag[0].split("/");
@@ -158,4 +128,37 @@ public class hmm {
 		}
 		return pos;
 	}
+	
+	private double ComputeTransitionProbability(int row, int col, String stateBefore, double[][] matrixCountStateLinkStateBefore) {
+		double result = 0;
+		int numberOfStateBefore = this.listState.get(stateBefore);
+		result = (matrixCountStateLinkStateBefore[row][col] + this.listState.size() * 0.5) / (numberOfStateBefore + this.listState.size() * 0.5 * 1000);
+		result = (double)Math.round(result * 100000) / 100000; 
+		return result;
+	}
+	
+	public void CreateTransitionProbabilityMatrix() {
+		double[][] matrixCountStateLinkStateBefore = CreateMatrixCountStateLinkStateBefore();
+		int sizeOfMatrix = this.listState.size();
+		this.transitionProbMatrix = new double[sizeOfMatrix][sizeOfMatrix];
+		int row, col;
+		for (String string1 : listState.keySet()) {
+			for (String string2 : listState.keySet()) {
+				row = FindPositionInListState(string1);
+				col = FindPositionInListState(string2);
+				this.transitionProbMatrix[row][col] = ComputeTransitionProbability(row, col, string1, matrixCountStateLinkStateBefore);
+			}
+		}
+	}
+	
+	public void CheckResult() {
+		for (int i = 0; i < this.listState.size(); i++) {
+			for (int j = 0; j < this.listState.size(); j++) {
+				if (this.transitionProbMatrix[i][j] > 1) System.out.println("false");
+			}
+		}
+		System.out.println("true");
+	}
+
+	public 
 }
