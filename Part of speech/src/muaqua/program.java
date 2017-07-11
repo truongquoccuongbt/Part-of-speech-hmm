@@ -2,6 +2,7 @@ package muaqua;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -16,7 +17,8 @@ public class program {
 		hm.CreateTransitionProbabilityMatrix();
 //		hm.PrintMatrix();
 //		hm.PrintArrState();
-		hm.CheckResult();
+		hm.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
+		hm.PrintArrState();
 		
 		
 		
@@ -51,4 +53,10 @@ public class program {
 //		}
 	}
 
+	private static String ReadInput(String path) throws IOException {
+		FileInputStream fstream = new FileInputStream(path);
+		BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+		String str = br.readLine();
+		return str;
+	}
 }

@@ -2,16 +2,19 @@ package muaqua;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.FileSystemNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class hmm {
 	private double [][] transitionProbMatrix;
+	private double [][] stateObservationLikelihoodMatrix;
 	private HashMap<String, Integer> listState;
 	private ArrayList<String> listSentences;
-	private String input;
+	private Word[] input;
 	
 	public ArrayList<String> getListSentences() {
 		return listSentences;
@@ -159,6 +162,14 @@ public class hmm {
 		}
 		System.out.println("true");
 	}
-
-	public 
+	
+	public void AddInput(String input) throws IOException {
+		String[] tmp = input.split(" ");
+		this.input = new Word[tmp.length];
+		
+		for (int i = 0; i < tmp.length; i++) {
+			this.input[i] = new Word();
+			this.input[i].setWord(tmp[i]);
+		}
+	}
 }
