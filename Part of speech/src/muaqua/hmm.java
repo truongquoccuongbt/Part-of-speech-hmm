@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 public class hmm {
 	private double [][] transitionProbMatrix;
-	private double [][] stateObservationLikelihoodMatrix;
+	private double [][] emissionProMatrix;
 	private HashMap<String, Integer> listState;
 	private ArrayList<String> listSentences;
 	private Word[] input;
@@ -62,6 +62,10 @@ public class hmm {
 		return this.listState;
 	}
 	
+	//--------------------------------------------------------------------------------------
+	// Kiểm tra lỗi chạy bài
+	//--------------------------------------------------------------------------------------
+	
 	public void PrintArrState() {
 		for (String string : this.listState.keySet()) {
 			String key = string.toString();
@@ -76,16 +80,41 @@ public class hmm {
 		}
 	}
 	
-	public void PrintMatrix() {
-		double[][] matrix = this.transitionProbMatrix;
+	public void PrintEmissionProMatrix() {
+		double[][] matrix = this.emissionProMatrix;
 		for (int i = 0; i < this.listState.size(); i++) {
-			for (int j = 0; j < this.listState.size(); j++) {
+			for (int j = 0; j < this.input.length; j++) {
 				System.out.print(matrix[i][j] + "  ");
 			}
 			System.out.println();
 		}
 	}
 	
+	public void PrintTransionPro() {
+		double[][] matrix = this.transitionProbMatrix;
+		for (int i = 0; i < this.listState.size(); i++) {
+			for (int j = 0; j < this.listState.size(); j++) {
+				System.out.print(matrix[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+	
+	public void CheckResult() {
+		for (int i = 0; i < this.listState.size(); i++) {
+			for (int j = 0; j < this.listState.size(); j++) {
+				if (this.transitionProbMatrix[i][j] > 1) System.out.println("false");
+			}
+		}
+		System.out.println("true");
+	}
+	
+	//*****************************************************************************************
+	
+	
+	//------------------------------------------------------------------------------------------
+	// Tính ma trận transition probability
+	//------------------------------------------------------------------------------------------
 	public double[][] CreateMatrixCountStateLinkStateBefore() {
 		int sizeOfMatrix = this.listState.size();
 		double[][] matrixCountStateLinkStateBefore = new double[sizeOfMatrix][sizeOfMatrix];
@@ -129,7 +158,7 @@ public class hmm {
 			}
 			pos++;
 		}
-		return pos;
+		return -1;
 	}
 	
 	private double ComputeTransitionProbability(int row, int col, String stateBefore, double[][] matrixCountStateLinkStateBefore) {
@@ -153,16 +182,14 @@ public class hmm {
 			}
 		}
 	}
+	//****************************************************************************************
 	
-	public void CheckResult() {
-		for (int i = 0; i < this.listState.size(); i++) {
-			for (int j = 0; j < this.listState.size(); j++) {
-				if (this.transitionProbMatrix[i][j] > 1) System.out.println("false");
-			}
-		}
-		System.out.println("true");
-	}
 	
+	
+	
+	//---------------------------------------------------------------------------------
+	// Xử lý input
+	//--------------------------------------------------------------------------------
 	public void AddInput(String input) throws IOException {
 		String[] tmp = input.split(" ");
 		this.input = new Word[tmp.length];
@@ -171,5 +198,74 @@ public class hmm {
 			this.input[i] = new Word();
 			this.input[i].setWord(tmp[i]);
 		}
+	}
+	//*********************************************************************************
+	
+	
+	//-----------------------------------------------------------------------------
+	// Tính ma trận emission probability
+	//-----------------------------------------------------------------------------
+	public void CreateEmissionProMatrix() {
+		 int sizeOfListState = this.listState.size();
+		 int sizeOfInput = this.input.length;
+		 
+		 this.emissionProMatrix = new double[sizeOfListState][sizeOfInput];
+		 for (int i = 0; i < sizeOfListState; i++) {
+			 for (int j = 0; j < sizeOfInput; j++) {
+				 this.emissionProMatrix[i][j] = 0;
+			 }
+		 }
+		 
+		 int[][] matrix = CountEmissionMatrix(sizeOfListState, sizeOfInput);
+		 int row = 0;
+		 for (String string : this.listState.keySet()) {
+			 for (int col = 0; col < sizeOfInput; col++) {
+				 this.emissionProMatrix[row][col] = ComputeEmissionProbalityEachWord(this.listState.get(string), matrix[row][col]);
+			 }
+			 row++;
+		 }
+	}
+	
+	private int[][] CountEmissionMatrix(int nRow, int nCol) {
+		int[][] matrix = new int[nRow][nCol];
+		for (int i = 0; i < nRow; i++) {
+			for (int j = 0; j < nCol; j++) {
+				matrix[i][j] = 0;
+			}
+		}
+		
+		int row, col;
+		String[] tmp1;
+		String[] tmp2;
+		for (int i = 0; i < this.listSentences.size(); i++) {
+			tmp1 = this.listSentences.get(i).split(" ");
+			for (int j = 0; j < tmp1.length; j++) {
+				tmp2 = tmp1[j].split("/");
+				row = FindPositionInListState(tmp2[1]);
+				col = FindPosOfWordInInput(tmp2[0], this.input);
+				if (row != -1 && col != -1) {
+					matrix[row][col]++;
+				}
+			}
+		}
+		return matrix;
+	}
+	
+	private int FindPosOfWordInInput(String key, Word[] input) {
+		String[] tmp;
+		for (int i = 0; i < input.length; i++) {
+			tmp = input[i].getWord().split("/");
+			if (tmp[0].equals(key)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	private double ComputeEmissionProbalityEachWord(int tag, int wordWithTag) {
+		double result = 0;
+		result = (double)(wordWithTag) / tag;
+		result = (double)Math.round((result * 100000)) / 100000;
+		return result;
 	}
 }

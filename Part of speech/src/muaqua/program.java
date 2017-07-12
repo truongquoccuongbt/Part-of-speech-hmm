@@ -18,6 +18,11 @@ public class program {
 //		hm.PrintMatrix();
 //		hm.PrintArrState();
 		hm.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
+		hm.CreateEmissionProMatrix();
+		hm.PrintTransionPro();
+		System.out.println();
+		hm.PrintEmissionProMatrix();
+		System.out.println();
 		hm.PrintArrState();
 		
 		
