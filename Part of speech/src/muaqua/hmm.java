@@ -191,6 +191,7 @@ public class hmm {
 	// Xử lý input
 	//--------------------------------------------------------------------------------
 	public void AddInput(String input) throws IOException {
+		input = "st/st " + input + " sf/sf";
 		String[] tmp = input.split(" ");
 		this.input = new Word[tmp.length];
 		
@@ -264,8 +265,33 @@ public class hmm {
 	
 	private double ComputeEmissionProbalityEachWord(int tag, int wordWithTag) {
 		double result = 0;
-		result = (double)(wordWithTag) / tag;
+		result = (double)(wordWithTag + this.listState.size() * 0.5) / (tag + this.listState.size() * 0.5);
 		result = (double)Math.round((result * 100000)) / 100000;
 		return result;
 	}
+	//***********************************************************************************************************
+	
+	
+	//---------------------------------------------------------------------------------------------------
+	// Tạo viterbi matrix
+	//---------------------------------------------------------------------------------------------------
+	private void CreateViterbiMatrix() {
+		int nRow = this.listState.size();
+		int nCol = this.input.length;
+		
+		double[][] viterbiMatrix = new double[nRow][nCol];
+		
+	}
+	
+	private double[][] ComputeFirstWordOfLine(String word, double[][] viterbiMatrix, int nRow) {
+		int colOfWordInTrans = FindPositionInListState(word);
+		int rowOfWordInTrans = FindPositionInListState("st");
+		double result = 0;
+		for (int i = 0; i < nRow; i++) {
+			viterbiMatrix[i][0] = this.transitionProbMatrix[rowOfWordInTrans][colOfWordInTrans] * this.emissionProMatrix[rowOfWordInTrans][0];
+		}
+		return viterbiMatrix;
+	}
+	
+	
 }
