@@ -90,6 +90,16 @@ public class hmm {
 		}
 	}
 	
+	public void PrintViterbiMatrix() {
+		double[][] matrix = CreateViterbiMatrix();
+		for (int i = 0; i < this.listState.size(); i++) {
+			for (int j = 0; j < this.input.length; j++) {
+				System.out.print(matrix[i][j] + "  ");
+			}
+			System.out.println();
+		}
+	}
+	
 	public void PrintTransionPro() {
 		double[][] matrix = this.transitionProbMatrix;
 		for (int i = 0; i < this.listState.size(); i++) {
@@ -138,14 +148,11 @@ public class hmm {
 			for (int i = 1; i < wordWithTag.length; i++) {
 				stringTmp1 = wordWithTag[i].split("/");
 				stringTmp2 = wordWithTag[i - 1].split("/");
+				if (stringTmp1[1].equals("sf")) continue;
 				row = FindPositionInListState(stringTmp2[1]);
 				col = FindPositionInListState(stringTmp1[1]);
 				transitionProMatrix[row][col]++;
 			}
-			stringTmp1 = wordWithTag[0].split("/");
-			row = FindPositionInListState(stringTmp1[1]);
-			col = FindPositionInListState(stringTmp1[1]);
-			transitionProMatrix[row][col]++;
 		}
 		return transitionProMatrix;
 	}
@@ -163,8 +170,8 @@ public class hmm {
 	
 	private double ComputeTransitionProbability(int row, int col, String stateBefore, double[][] matrixCountStateLinkStateBefore) {
 		double result = 0;
-		int numberOfStateBefore = this.listState.get(stateBefore);
-		result = (matrixCountStateLinkStateBefore[row][col] + this.listState.size() * 0.5) / (numberOfStateBefore + this.listState.size() * 0.5 * 1000);
+		double numberOfStateBefore = this.listState.get(stateBefore);
+		result = (matrixCountStateLinkStateBefore[row][col] + 10) / (numberOfStateBefore + this.listState.size() * 10);
 		result = (double)Math.round(result * 100000) / 100000; 
 		return result;
 	}
@@ -265,7 +272,7 @@ public class hmm {
 	
 	private double ComputeEmissionProbalityEachWord(int tag, int wordWithTag) {
 		double result = 0;
-		result = (double)(wordWithTag + this.listState.size() * 0.5) / (tag + this.listState.size() * 0.5);
+		result = (double)(wordWithTag + 10) / (tag + this.input.length * 10);
 		result = (double)Math.round((result * 100000)) / 100000;
 		return result;
 	}
@@ -275,23 +282,51 @@ public class hmm {
 	//---------------------------------------------------------------------------------------------------
 	// Tạo viterbi matrix
 	//---------------------------------------------------------------------------------------------------
-	private void CreateViterbiMatrix() {
+	private double[][] CreateViterbiMatrix() {
 		int nRow = this.listState.size();
 		int nCol = this.input.length;
 		
 		double[][] viterbiMatrix = new double[nRow][nCol];
 		
+		// Cột đầu tiên và cuối cùng bằng 0
+		for (int i = 0; i < nRow; i++) {
+			viterbiMatrix[i][0] = 0;
+			viterbiMatrix[i][nCol - 1] = 0;
+		}
+		
+		viterbiMatrix = ComputeFirstWordOfLine(viterbiMatrix, nRow);
+		viterbiMatrix = ComputeOtherWordOfLine(viterbiMatrix, nRow);
+		return viterbiMatrix;
 	}
 	
-	private double[][] ComputeFirstWordOfLine(String word, double[][] viterbiMatrix, int nRow) {
-		int colOfWordInTrans = FindPositionInListState(word);
-		int rowOfWordInTrans = FindPositionInListState("st");
-		double result = 0;
+	private double[][] ComputeFirstWordOfLine(double[][] viterbiMatrix, int nRow) {
+		int row = FindPositionInListState("st");
 		for (int i = 0; i < nRow; i++) {
-			viterbiMatrix[i][0] = this.transitionProbMatrix[rowOfWordInTrans][colOfWordInTrans] * this.emissionProMatrix[rowOfWordInTrans][0];
+			viterbiMatrix[i][1] = this.transitionProbMatrix[row][i] * this.emissionProMatrix[i][1];
+			viterbiMatrix[i][1] = (double) Math.round(viterbiMatrix[i][1] * 100000) / 100000;
 		}
 		return viterbiMatrix;
 	}
 	
+	private double[][] ComputeOtherWordOfLine(double[][] viterbiMatrix, int nRow) {
+		for (int i = 2; i < this.input.length - 1; i++) {
+			for (int j = 0; j < nRow; j++) {
+				viterbiMatrix[j][i] = MaxProOfWordWithTag(viterbiMatrix, nRow, j, i);
+			}
+		}
+		return viterbiMatrix;
+	}
 	
+	private double MaxProOfWordWithTag(double[][] viterbiMax, int nRow, int posOfStateWithWord, int posOfWordInInput) {
+		double result;
+		double max = 0;
+		for (int i = 0; i < nRow; i++) {
+			result = this.transitionProbMatrix[i][posOfStateWithWord] * this.emissionProMatrix[posOfStateWithWord][posOfWordInInput] * viterbiMax[i][posOfWordInInput - 1];
+			result = (double) Math.round(result * 100000) / 100000;
+			if (max < result) {
+				max = result;
+			}
+		}		
+		return max;
+	}
 }
