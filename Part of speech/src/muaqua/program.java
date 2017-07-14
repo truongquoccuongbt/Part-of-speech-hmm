@@ -13,32 +13,34 @@ public class program {
 		for (int i = 1; i <= 142; i++) {
 			hm.ReadFile("/home/quoccuong/eclipse-workspace/Part of speech/data/" + i + ".pos");
 		}
-//		hm.FindUniqueStateAndCount(hm.getListSentences());
-//		hm.CreateTransitionProbabilityMatrix();
-//		hm.PrintMatrix();
-//		hm.PrintArrState();
-//		hm.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
-//		hm.CreateEmissionProMatrix();
-//		hm.PrintTransionPro();
-//		System.out.println();
-//		hm.PrintEmissionProMatrix();
-//		System.out.println();
-//		hm.PrintArrState();
-		
-		
-		
-		hmm hm1 = new hmm();
-		hm1.ReadFile("/home/quoccuong/eclipse-workspace/Part of speech/data/1000.pos");
-		hm1.FindUniqueStateAndCount(hm1.getListSentences());
-		hm1.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
-		hm1.CreateTransitionProbabilityMatrix();
-		hm1.PrintTransionPro();
+		hm.FindUniqueStateAndCount(hm.getListSentences());
+		hm.CreateTransitionProbabilityMatrix();
+		hm.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
+		hm.CreateEmissionProMatrix();
+		hm.PrintTransionPro();
 		System.out.println();
-		hm1.CreateEmissionProMatrix();
-		hm1.PrintEmissionProMatrix();
+		hm.PrintEmissionProMatrix();
 		System.out.println();
-		hm1.PrintViterbiMatrix();
-		hm1.PrintArrState();
+		hm.CreateEmissionProMatrix();
+		hm.PrintViterbiMatrix();
+		hm.PrintArrState();
+		hm.PrintOutput();
+		
+		
+		
+//		hmm hm1 = new hmm();
+//		hm1.ReadFile("/home/quoccuong/eclipse-workspace/Part of speech/data/1000.pos");
+//		hm1.FindUniqueStateAndCount(hm1.getListSentences());
+//		hm1.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
+//		hm1.CreateTransitionProbabilityMatrix();
+//		hm1.PrintTransionPro();
+//		System.out.println();
+//		hm1.CreateEmissionProMatrix();
+//		hm1.PrintEmissionProMatrix();
+//		System.out.println();
+//		hm1.PrintViterbiMatrix();
+//		hm1.PrintArrState();
+//		hm1.PrintOutput();
 		
 		
 		

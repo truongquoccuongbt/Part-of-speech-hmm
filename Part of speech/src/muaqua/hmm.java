@@ -148,7 +148,7 @@ public class hmm {
 			for (int i = 1; i < wordWithTag.length; i++) {
 				stringTmp1 = wordWithTag[i].split("/");
 				stringTmp2 = wordWithTag[i - 1].split("/");
-				if (stringTmp1[1].equals("sf")) continue;
+				
 				row = FindPositionInListState(stringTmp2[1]);
 				col = FindPositionInListState(stringTmp1[1]);
 				transitionProMatrix[row][col]++;
@@ -171,8 +171,8 @@ public class hmm {
 	private double ComputeTransitionProbability(int row, int col, String stateBefore, double[][] matrixCountStateLinkStateBefore) {
 		double result = 0;
 		double numberOfStateBefore = this.listState.get(stateBefore);
-		result = (matrixCountStateLinkStateBefore[row][col] + 10) / (numberOfStateBefore + this.listState.size() * 10);
-		result = (double)Math.round(result * 100000) / 100000; 
+		result = (matrixCountStateLinkStateBefore[row][col] + 0.00000001) / (numberOfStateBefore + this.listState.size() * 0.00000001);
+		//result = (double)Math.round(result * 100) / 100; 
 		return result;
 	}
 	
@@ -272,8 +272,8 @@ public class hmm {
 	
 	private double ComputeEmissionProbalityEachWord(int tag, int wordWithTag) {
 		double result = 0;
-		result = (double)(wordWithTag + 10) / (tag + this.input.length * 10);
-		result = (double)Math.round((result * 100000)) / 100000;
+		result = (double)(wordWithTag + 0.00000001) / (tag + this.input.length * 0.00000001);
+		//result = (double)Math.round((result * 100)) / 100;
 		return result;
 	}
 	//***********************************************************************************************************
@@ -296,6 +296,8 @@ public class hmm {
 		
 		viterbiMatrix = ComputeFirstWordOfLine(viterbiMatrix, nRow);
 		viterbiMatrix = ComputeOtherWordOfLine(viterbiMatrix, nRow);
+		PartOfSpeechWord(viterbiMatrix, nRow, nCol);
+		
 		return viterbiMatrix;
 	}
 	
@@ -303,7 +305,7 @@ public class hmm {
 		int row = FindPositionInListState("st");
 		for (int i = 0; i < nRow; i++) {
 			viterbiMatrix[i][1] = this.transitionProbMatrix[row][i] * this.emissionProMatrix[i][1];
-			viterbiMatrix[i][1] = (double) Math.round(viterbiMatrix[i][1] * 100000) / 100000;
+			//viterbiMatrix[i][1] = (double) Math.round(viterbiMatrix[i][1] * 100) / 100;
 		}
 		return viterbiMatrix;
 	}
@@ -322,11 +324,51 @@ public class hmm {
 		double max = 0;
 		for (int i = 0; i < nRow; i++) {
 			result = this.transitionProbMatrix[i][posOfStateWithWord] * this.emissionProMatrix[posOfStateWithWord][posOfWordInInput] * viterbiMax[i][posOfWordInInput - 1];
-			result = (double) Math.round(result * 100000) / 100000;
+			//result = (double) Math.round(result * 1000000000) / 1000000000;
+			result = result * 1000000000;
 			if (max < result) {
 				max = result;
 			}
 		}		
 		return max;
+	}
+	
+	private String FindKeyFromPos(HashMap<String, Integer> hashmap, int pos) {
+		int tmp = -1;
+		for (String string : hashmap.keySet()) {
+			tmp++;
+			if (tmp == pos) {
+				return string;
+			}
+		}
+		return null;
+	}
+	
+	//-----------------------------------------------------------------------------------------------
+	// Xử lý output
+	//-----------------------------------------------------------------------------------------------
+	public void PartOfSpeechWord(double[][] viterbiMax, int nRow, int nCol) {
+		int row = -1;
+		for (int i = 1; i < nCol - 1; i++) {
+			double max = -1;
+			for (int j = 0; j < nRow; j++) {
+				if (max < viterbiMax[j][i]) {
+					max = viterbiMax[j][i];
+					row = j;
+				}
+			}
+			this.input[i].setTag(FindKeyFromPos(this.listState, row));
+		}
+	}
+	
+	public void PrintOutput() {
+		String a;
+		for (int i = 1; i < this.input.length - 1; i++) {
+			a = this.input[i].getWord() + "/" + this.input[i].getTag();
+			if (i + 1 < this.input.length - 1) {
+				a = a + " ";
+			}
+			System.out.println(a);
+		}
 	}
 }
