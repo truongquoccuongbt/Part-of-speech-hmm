@@ -1,37 +1,49 @@
 package muaqua;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Clock;
 
 public class program {
 
 	public static void main(String[] args) throws IOException {
+		long start = System.currentTimeMillis();
 		hmm hm = new hmm();
-		for (int i = 1; i <= 142; i++) {
-			hm.ReadFile("/home/quoccuong/eclipse-workspace/Part of speech/data/" + i + ".pos");
+		for (int i = 9; i <= 142; i++) {
+			hm.ReadFile("/home/quoccuong/eclipse-workspace/Part of speech _vesion2/data/" + i + ".pos");
 		}
 		hm.FindUniqueStateAndCount(hm.getListSentences());
 		hm.CreateTransitionProbabilityMatrix();
-		hm.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
-		hm.CreateEmissionProMatrix();
-		hm.PrintTransionPro();
-		System.out.println();
-		hm.PrintEmissionProMatrix();
-		System.out.println();
-		hm.CreateEmissionProMatrix();
-		hm.PrintViterbiMatrix();
-		hm.PrintArrState();
-		hm.PrintOutput();
+//		hm.HandleInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
+//		hm.CreateEmissionProMatrix();
+//		hm.CreateEmissionProMatrix();
+//		hm.CreateViterbiMatrix();
+//		hm.PrintOutput();
+//		hm.CreateTransitionProbabilityMatrix();
+//		hm.PrintEmissionProMatrix();
+//		hm.PrintArrState();
+//		hm.PrintOutput();
 		
+		//String []input = ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt");
+		FileInputStream fstream = new FileInputStream("/home/quoccuong/eclipse-workspace/Part of speech _vesion2/test/input.txt");
+		BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+		String line;
+		while ((line = br.readLine()) != null) {
+			XuLy(hm, line);
+		}
+		
+		long end = System.currentTimeMillis();
+		System.out.println((end - start) / 1000);
 		
 		
 //		hmm hm1 = new hmm();
-//		hm1.ReadFile("/home/quoccuong/eclipse-workspace/Part of speech/data/1000.pos");
+//		hm1.ReadFile("/home/quoccuong/eclipse-workspace/Part of speech _vesion2/data/1000.pos");
 //		hm1.FindUniqueStateAndCount(hm1.getListSentences());
-//		hm1.AddInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech/test/input.txt"));
+//		hm1.HandleInput(ReadInput("/home/quoccuong/eclipse-workspace/Part of speech _vesion2/test/input.txt"));
 //		hm1.CreateTransitionProbabilityMatrix();
 //		hm1.PrintTransionPro();
 //		System.out.println();
@@ -52,7 +64,7 @@ public class program {
 //			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
 //				String string;
 //			int vt = 0;
-//				String a = "CĐ/Ny Kinh_tế/N -/- công_nghệ/N TP/Ny ";
+//				String a = "oOo/oOo";
 //				while ((string = br.readLine()) != null) {
 //					vt++;
 //					try {
@@ -65,6 +77,13 @@ public class program {
 //					}
 //				}
 //		}
+	}
+	private static void XuLy(hmm hm, String str) throws IOException {
+		hm.HandleInput(str);
+		hm.CreateEmissionProMatrix();
+		hm.CreateEmissionProMatrix();
+		hm.CreateViterbiMatrix();
+		hm.PrintOutput();
 	}
 
 	private static String ReadInput(String path) throws IOException {
